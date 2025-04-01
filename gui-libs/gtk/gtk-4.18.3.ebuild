@@ -10,6 +10,7 @@ HOMEPAGE="https://www.gtk.org/ https://gitlab.gnome.org/GNOME/gtk/"
 
 LICENSE="LGPL-2+"
 SLOT="4"
+# IUSE="accesskit aqua broadway cloudproviders colord cups examples gstreamer +introspection sysprof test vulkan wayland +X cpu_flags_x86_f16c"
 IUSE="aqua broadway cloudproviders colord cups examples gstreamer +introspection sysprof test vulkan wayland +X cpu_flags_x86_f16c"
 REQUIRED_USE="
 	|| ( aqua wayland X )
@@ -19,11 +20,11 @@ REQUIRED_USE="
 KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~loong ~ppc ~ppc64 ~riscv ~sparc ~x86"
 
 COMMON_DEPEND="
-	>=dev-libs/glib-2.76.0:2
-	>=x11-libs/pango-1.52.0[introspection?]
+	>=dev-libs/glib-2.80.0:2
+	>=x11-libs/pango-1.56.0[introspection?]
 	>=media-libs/harfbuzz-2.6.0:=
 	>=dev-libs/fribidi-1.0.6
-	>=x11-libs/cairo-1.18.0[aqua?,glib,svg(+),X?]
+	>=x11-libs/cairo-1.18.2[aqua?,glib,svg(+),X?]
 	>=x11-libs/gdk-pixbuf-2.30:2[introspection?]
 
 	>=media-libs/graphene-1.10.0[introspection?]
@@ -48,11 +49,10 @@ COMMON_DEPEND="
 			>=media-libs/gst-plugins-base-1.24.0:1.0[opengl]
 		)
 	)
-	introspection? ( >=dev-libs/gobject-introspection-1.76:= )
 	vulkan? ( >=media-libs/vulkan-loader-1.3:=[wayland?,X?] )
 	wayland? (
-		>=dev-libs/wayland-1.21.0
-		>=dev-libs/wayland-protocols-1.36
+		>=dev-libs/wayland-1.23.0
+		>=dev-libs/wayland-protocols-1.41
 		media-libs/mesa[wayland]
 		>=x11-libs/libxkbcommon-0.2
 	)
@@ -97,6 +97,7 @@ BDEPEND="
 	dev-libs/glib
 	>=dev-util/gdbus-codegen-2.48
 	dev-util/glib-utils
+	>=dev-libs/meson-1.2.0
 	>=sys-devel/gettext-0.19.7
 	virtual/pkgconfig
 	vulkan? ( media-libs/shaderc )
@@ -155,6 +156,7 @@ src_configure() {
 		$(meson_use broadway broadway-backend)
 		$(meson_use aqua macos-backend)
 		-Dwin32-backend=false
+		$(meson_use android android-backend)
 
 		# Media backends
 		$(meson_feature gstreamer media-gstreamer)
@@ -167,8 +169,8 @@ src_configure() {
 		$(meson_feature vulkan)
 		$(meson_feature cloudproviders)
 		$(meson_feature sysprof)
-		-Dtracker=disabled  # tracker3 is not packaged in Gentoo yet
 		$(meson_feature colord)
+
 		# Expected to fail with GCC < 11
 		# See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=71993
 		$(meson_feature cpu_flags_x86_f16c f16c)
