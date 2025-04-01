@@ -18,20 +18,22 @@ REQUIRED_USE="
 
 KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~loong ~ppc ~ppc64 ~riscv ~sparc ~x86"
 
-# TODO: Optional gst build dep on >=gst-plugins-base-1.23.1, so depend on it once we can
 COMMON_DEPEND="
 	>=dev-libs/glib-2.76.0:2
-	>=x11-libs/cairo-1.18.0[aqua?,glib,svg(+),X?]
 	>=x11-libs/pango-1.52.0[introspection?]
-	>=dev-libs/fribidi-1.0.6
 	>=media-libs/harfbuzz-2.6.0:=
+	>=dev-libs/fribidi-1.0.6
+	>=x11-libs/cairo-1.18.0[aqua?,glib,svg(+),X?]
 	>=x11-libs/gdk-pixbuf-2.30:2[introspection?]
+
+	>=media-libs/graphene-1.10.0[introspection?]
+	>=media-libs/libepoxy-1.4[egl(+),X(+)?]
+
 	media-libs/libpng:=
 	media-libs/tiff:=
 	media-libs/libjpeg-turbo:=
-	>=media-libs/libepoxy-1.4[egl(+),X(+)?]
-	>=media-libs/graphene-1.10.0[introspection?]
 	app-text/iso-codes
+
 	x11-misc/shared-mime-info
 
 	cloudproviders? ( net-libs/libcloudproviders )
@@ -151,8 +153,8 @@ src_configure() {
 		$(meson_use X x11-backend)
 		$(meson_use wayland wayland-backend)
 		$(meson_use broadway broadway-backend)
-		-Dwin32-backend=false
 		$(meson_use aqua macos-backend)
+		-Dwin32-backend=false
 
 		# Media backends
 		$(meson_feature gstreamer media-gstreamer)
