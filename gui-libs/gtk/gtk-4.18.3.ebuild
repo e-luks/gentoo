@@ -10,8 +10,7 @@ HOMEPAGE="https://www.gtk.org/ https://gitlab.gnome.org/GNOME/gtk/"
 
 LICENSE="LGPL-2+"
 SLOT="4"
-# IUSE="accesskit aqua broadway cloudproviders colord cups examples gstreamer +introspection sysprof test vulkan wayland +X cpu_flags_x86_f16c"
-IUSE="aqua broadway cloudproviders colord cups examples gstreamer +introspection sysprof test vulkan wayland +X cpu_flags_x86_f16c"
+IUSE="android accesskit aqua broadway cloudproviders colord cups examples gstreamer +introspection sysprof test localsearch vulkan wayland +X cpu_flags_x86_f16c"
 REQUIRED_USE="
 	|| ( aqua wayland X )
 	test? ( introspection )
@@ -37,6 +36,7 @@ COMMON_DEPEND="
 
 	x11-misc/shared-mime-info
 
+	accesskit? ( >=accesskit-c-0.15 )
 	cloudproviders? ( net-libs/libcloudproviders )
 	colord? ( >=x11-misc/colord-0.1.9:0= )
 	cups? ( >=net-print/cups-2.0 )
@@ -156,7 +156,8 @@ src_configure() {
 		$(meson_use broadway broadway-backend)
 		$(meson_use aqua macos-backend)
 		-Dwin32-backend=false
-		$(meson_use android android-backend)
+		# TODO: Package accesskit
+		# $(meson_use android android-backend)
 
 		# Media backends
 		$(meson_feature gstreamer media-gstreamer)
@@ -169,7 +170,9 @@ src_configure() {
 		$(meson_feature vulkan)
 		$(meson_feature cloudproviders)
 		$(meson_feature sysprof)
+		$(meson_feature localsearch tracker)
 		$(meson_feature colord)
+		$(meson_feature accesskit)
 
 		# Expected to fail with GCC < 11
 		# See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=71993
