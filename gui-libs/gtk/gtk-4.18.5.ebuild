@@ -76,6 +76,7 @@ DEPEND="${COMMON_DEPEND}
 "
 RDEPEND="${COMMON_DEPEND}
 	>=dev-util/gtk-update-icon-cache-3
+	accessibility? ( >=app-accessibility/accesskit-c-0.15.1 )
 "
 # librsvg for svg icons (PDEPEND to avoid circular dep on wd40 profiles with librsvg[tools]), bug #547710
 PDEPEND="
@@ -164,6 +165,7 @@ src_configure() {
 		# Optional dependencies
 		$(meson_feature vulkan)
 		$(meson_feature cloudproviders)
+		$(meson_feature accessibility accesskit)
 		$(meson_feature sysprof)
 		-Dtracker=disabled  # tracker3 is not packaged in Gentoo yet
 		$(meson_feature colord)
