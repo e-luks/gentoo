@@ -32,11 +32,11 @@ RESTRICT="!test? ( test )"
 # Second block is dependency() from subdir meson.builds, sorted by directory name occurrence order
 DEPEND="
 	gnome-online-accounts? (
-		x11-libs/gtk+:3
+		x11-libs/gtk+:3[X,wayland?]
 		>=net-libs/gnome-online-accounts-3.49.1:=
 	)
 	>=media-libs/libpulse-2.0[glib]
-	>=gui-libs/gtk-4.11.2:4[X,wayland=]
+	>=gui-libs/gtk-4.11.2:4[X,wayland?]
 	>=gui-libs/libadwaita-1.4_alpha:1
 	>=sys-apps/accountsservice-0.6.39
 	>=x11-misc/colord-0.1.34:0=
