@@ -29,6 +29,7 @@ RDEPEND="
 	>=gui-libs/libpanel-1.4
 	sys-libs/libunwind:=
 	>=sys-auth/polkit-0.114[daemon(+)]
+	dev-libs/elfutils
 	>=dev-util/sysprof-common-${PV}
 	>=dev-util/sysprof-capture-${PV}:${API_VERSION}
 "
