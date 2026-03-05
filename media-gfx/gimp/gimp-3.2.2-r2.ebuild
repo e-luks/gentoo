@@ -70,8 +70,7 @@ COMMON_DEPEND="
 	media-gfx/mypaint-brushes:2.0=
 	>=media-libs/fontconfig-2.12.4
 	>=media-libs/freetype-2.1.7
-	<media-libs/gexiv2-0.15.0[introspection]
-	>=media-libs/gexiv2-0.14.0:=[introspection]
+	>=media-libs/gexiv2-0.14.0:0=[introspection]
 	>=media-libs/harfbuzz-2.8.2:=
 	>=media-libs/lcms-2.8:2
 	media-libs/libjpeg-turbo:=
@@ -157,6 +156,10 @@ BDEPEND="
 
 DOCS=( "AUTHORS" "NEWS" "README" "README.i18n" )
 
+PATCHES=(
+	"${FILESDIR}/gimp-3.2.2-fix-typo.patch"
+)
+
 pkg_pretend() {
 	[[ ${MERGE_TYPE} != binary ]] && use openmp && tc-check-openmp
 }
@@ -196,27 +199,23 @@ src_prepare() {
 	default
 
 	# Fix Gimp  and GimpUI devel doc installation paths
-	sed -e "s/'doc'/'gtk-doc'/" -i devel-docs/reference/gimp{,-ui}/meson.build || die
+	sed -i -e "s/'doc'/'gtk-doc'/" devel-docs/reference/gimp/meson.build || die
+	sed -i -e "s/'doc'/'gtk-doc'/" devel-docs/reference/gimp-ui/meson.build || die
 
 	# Fix pygimp.interp python implementation path.
 	# Meson @PYTHON_PATH@ use sandbox path e.g.:
 	# '/var/tmp/portage/media-gfx/gimp-2.99.12/temp/python3.10/bin/python3'
-	sed -e 's/@PYTHON_EXE@/'${EPYTHON}'/' -i plug-ins/python/pygimp.interp.in || die
+	sed -i -e 's/@PYTHON_EXE@/'${EPYTHON}'/' plug-ins/python/pygimp.interp.in || die
 
 	# Set proper intallation path of documentation logo
-	sed -e "s/'gimp-' + gimp_api_version/'gimp-${PVR}'/" -i gimp-data/images/logo/meson.build || die
+	sed -i -e "s/'gimp-' + gimp_api_version/'gimp-${PVR}'/" gimp-data/images/logo/meson.build || die
 
-	# Force disable x11_target if USE="-X" is setup. See bug #943164 for additional info
-	if use !X; then
-		sed -e 's/x11_target = /x11_target = false #/' -i meson.build || die
-	fi
-
-	# Disable automagic pandoc use that isn't relevant for a package build
-	sed -e '/pandoc/ s/ = .*/ = disabler()/' -i docs/meson.build || die
+	# Force disable x11_target if USE="-X" is setup. See bug 943164 for additional info
+	use !X && { sed -i -e 's/x11_target = /x11_target = false #/' meson.build || die; }
 }
 
 src_configure() {
-	# Defang automagic dependencies, bug #943164
+	# defang automagic dependencies. Bug 943164
 	use wayland || append-cppflags -DGENTOO_GTK_HIDE_WAYLAND
 	use X || append-cppflags -DGENTOO_GTK_HIDE_X11
 
@@ -270,7 +269,7 @@ src_compile() {
 	meson_src_compile
 }
 
-# bug #664938
+# for https://bugs.gentoo.org/664938
 _rename_plugins() {
 	einfo 'Renaming plug-ins to not collide with pre-2.10.6 file layout (bug #664938)...'
 	local prename=gimp-org-
