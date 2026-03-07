@@ -36,6 +36,12 @@
 
 #--- END OF EXAMPLES ---
 
+#Lukas Schmelting <lschmelting@posteo.com> (2026-05-09)
+# GNOME 50 mask
+#
+# ~30 test failures in conjunction with GNOME 49 series packages
+=gui-libs/gtk-4.22*
+
 # Pacho Ramos <pacho@gentoo.org> (2026-05-09)
 # Obsolete version not compatible with current gnome-shell versions.
 # Upstream changed completely the way to package it. If still interested,
