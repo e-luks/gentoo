@@ -7,12 +7,15 @@
 # Implements the following checks:
 # 1) Installation to user-customization locations
 #    1a) /etc/udev/rules.d (udev rules files)
+#    1b) /etc/udev/hwdb.d  (udev hardware database files)
 # 2) Installation of udev files without inheriting udev.eclass, which provides
 #    helper functions used in pkg_postinst and pkg_postrm to update udev state.
 #    2a) /lib/udev/rules.d (udev rules files)
+#    2b) /lib/udev/hwdb.d  (udev hardware database files)
 # 3) Installation of udev files without triggering udev state updates in
 #    pkg_postinst and pkg_postrm via eclass helper functions.
 #    3a) udev_reload
+#    3b) udev_hwdb_update
 
 
 # Check whether a directory contains any non-hidden files (i.e avoid triggering
@@ -34,6 +37,12 @@ udev_rules_check() {
 		eqawarn "udev rules files supplied by ebuilds must be installed to /lib/udev/rules.d/"
 	fi
 
+	# Check 1b: Scan image for files in /etc/udev/hwdb.d which is a forbidden location
+	if _dir_has_nonhidden_files "etc/udev/hwdb.d"; then
+		eqawarn "QA Notice: files installed to /etc/udev/hwdb.d found"
+		eqawarn "hwdb files supplied by ebuilds must be installed to /usr/lib/udev/hwdb.d/"
+	fi
+
 	# Check 2
     # Detect whether udev.eclass must be inherited which provides helper
     # functions for updating udev state
@@ -47,6 +56,7 @@ udev_rules_check() {
 	fi
 
     local need_udev_reload=0
+    local need_udev_hwdb_update=0
 
     # Check 2a: Check if udev rules must be updated
     if _dir_has_nonhidden_files "lib/udev/rules.d" \
@@ -54,16 +64,24 @@ udev_rules_check() {
         need_udev_reload=1
     fi
 
+    # Check 2b: Check if udev binary hardware database must be updated
+    if _dir_has_nonhidden_files "lib/udev/hwdb.d" \
+       || _dir_has_nonhidden_files "usr/lib/udev/hwdb.d"; then
+	    need_udev_hwdb_update=1
+    fi
+
     # No relevant files -> nothing to enforce
     if [[ ${need_udev_reload} -eq 0 ]]; then
 	    return
     fi
 
-    # If any udev rules or hwdb files are present, the eclass must be inherited
-    if [[ ${need_udev_reload} -eq 1 ]] && ! has udev ${INHERITED}; then
+    # If any udev feature is used, eclass must be inherited
+    if [[ ${need_udev_reload} -eq 1 || ${need_udev_hwdb_update} -eq 1 ]] \
+       && ! has udev ${INHERITED}; then
 	    eqawarn "QA Notice: package is installing udev-related files without inheriting"
         eqawarn "udev.eclass! Packages must inherit udev.eclass then call the respective"
-        eqawarn "eclass function (udev_reload) in pkg_postinst and pkg_postrm."
+        eqawarn "eclass function (udev_reload and udev_hwdb_update) in pkg_postinst and"
+        eqawarn "pkg_postrm."
 	    return
     fi
 
@@ -85,6 +103,18 @@ udev_rules_check() {
 	    if [[ ! ${pkg_postrm_body} == *udev_reload* ]]; then
 		    eqawarn "QA Notice: package is installing udev rules without calling"
 		    eqawarn "udev_reload in pkg_postrm phase"
+	    fi
+    fi
+
+    if [[ ${need_udev_hwdb_update} -eq 1 ]]; then
+	    if [[ ! ${pkg_postinst_body} == *udev_hwdb_update* ]]; then
+		    eqawarn "QA Notice: package is installing hwdb files without calling"
+		    eqawarn "udev_hwdb_update in pkg_postinst phase"
+	    fi
+
+	    if [[ ! ${pkg_postrm_body} == *udev_hwdb_update* ]]; then
+		    eqawarn "QA Notice: package is installing hwdb files without calling"
+		    eqawarn "udev_hwdb_update in pkg_postrm phase"
 	    fi
     fi
 }
